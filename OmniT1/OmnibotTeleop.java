@@ -30,6 +30,11 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.Range;
@@ -65,6 +70,11 @@ public class OmnibotTeleop extends LinearOpMode {
         double drive;
         double turn;
         double max;
+        int count = 0;
+          Orientation angles;
+    Acceleration gravity;
+        double pos = 0.0;
+
 
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
@@ -113,6 +123,21 @@ public class OmnibotTeleop extends LinearOpMode {
             clawOffset = Range.clip(clawOffset, -0.5, 0.5);
             robot.leftClaw.setPosition(robot.MID_SERVO + clawOffset);
             robot.rightClaw.setPosition(robot.MID_SERVO - clawOffset);
+            
+            //==============================================
+            // LEts try some Gyro
+            count++;
+            angles   = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            gravity  = robot.imu.getGravity();
+            pos = 0.01 * angles.firstAngle ;
+            telemetry.addData("Status", "Running " + String.format("%d",count)
+                            + " " + String.format("%f",pos)
+                            + " " + String.format("%f",angles.firstAngle) 
+                            + " " + String.format("%f",gravity.xAccel));
+            telemetry.update();
+            //==============================================
+
+            
 /*
             // Use gamepad buttons to move arm up (Y) and down (A)
             if (gamepad1.y)
@@ -121,13 +146,13 @@ public class OmnibotTeleop extends LinearOpMode {
                 robot.leftArm.setPower(robot.ARM_DOWN_POWER);
             else
                 robot.leftArm.setPower(0.0);
-*/
+
             // Send telemetry message to signify robot running;
             telemetry.addData("claw",  "Offset = %.2f", clawOffset);
             telemetry.addData("left",  "%.2f", left);
             telemetry.addData("right", "%.2f", right);
             telemetry.update();
-
+*/
             // Pace this loop so jaw action is reasonable speed.
             sleep(50);
         }
