@@ -92,11 +92,11 @@ public class HardwarePushbot
         // Define and Initialize Motors
         leftDrive  = hwMap.get(DcMotor.class, "left_drive");
         rightDrive = hwMap.get(DcMotor.class, "right_drive");
-/* KS        
-        leftArm    = hwMap.get(DcMotor.class, "left_arm");
+        
+//        leftArm    = hwMap.get(DcMotor.class, "left_arm");
         leftDrive.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        rightDrive.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
-*/
+        rightDrive.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+
         // Set all motors to zero power
         leftDrive.setPower(0);
         rightDrive.setPower(0);
