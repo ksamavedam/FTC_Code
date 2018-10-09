@@ -99,7 +99,6 @@ public class OmnibotHw
         topDrive = hwMap.get(DcMotor.class, "top_drive");
 
         
-//        leftArm    = hwMap.get(DcMotor.class, "left_arm");
         leftDrive.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
         rightDrive.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
         bottomDrive.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
@@ -112,19 +111,19 @@ public class OmnibotHw
         topDrive.setPower(0);
 
         // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
-        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
-        bottomDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
-        topDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
-        // Define and initialize ALL installed servos.
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bottomDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        topDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        // Define and initialize ALL installed servos.
         leftClaw  = hwMap.get(Servo.class, "left_hand");
-        leftClaw.setPosition(MID_SERVO);
-        
+        leftClaw.setPosition(MID_SERVO);     
         rightClaw = hwMap.get(Servo.class, "right_hand");
         rightClaw.setPosition(MID_SERVO);
         
+		
+		// GYRO
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           =  BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           =  BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
