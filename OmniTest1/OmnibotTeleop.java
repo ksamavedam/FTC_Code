@@ -97,6 +97,12 @@ public class OmnibotTeleop extends LinearOpMode {
             // This way it's also easy to just drive straight, or just turn.
             drive =  -gamepad1.left_stick_y;
             turn  =  gamepad1.right_stick_x;
+            telemetry.addData("Left: x,y->", gamepad1.left_stick_x+","+gamepad1.left_stick_y); 
+            telemetry.addData("Right: x,y->", gamepad1.right_stick_x+","+gamepad1.right_stick_y); 
+            telemetry.addData("Left: trigger->", gamepad1.left_trigger); 
+            telemetry.addData("Right: trigger->", gamepad1.right_trigger); 
+
+            telemetry.update();
 
             // Combine drive and turn for blended motion.
             left  = drive + turn;
@@ -109,12 +115,13 @@ public class OmnibotTeleop extends LinearOpMode {
                 left /= max ;
                 right /= max;
             }
+/*
             telemetry.addData("Left:", left + ", Right:" + right);    //
             telemetry.update();
             // Output the safe vales to the motor drives.
-            robot.leftDrive.setPower(left);
-            robot.rightDrive.setPower(right);
-
+//            robot.leftDrive.setPower(left);
+//            robot.rightDrive.setPower(right);
+*/
             // Use gamepad left & right Bumpers to open and close the claw
             if (gamepad1.right_bumper)
                 clawOffset += CLAW_SPEED;
