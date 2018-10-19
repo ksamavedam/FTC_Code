@@ -4,6 +4,7 @@ Testing out Dual Hub Configuration
 # Dual Hub Connectivity
 
 From: https://www.reddit.com/r/FTC/comments/6twjaj/how_to_connect_two_rev_expansion_hubs_together/
+
 Thanks to Team: 7316
 
 - Plug in your FTC legal phone which has robot controller version 3.1 (NECESSARY) into the one of your expansion hubs via the USB. For sake of simplicity, I will now refer to it as 'hub A'. (DO NOT DO ANYTHING WITH THE OTHER HUB)
