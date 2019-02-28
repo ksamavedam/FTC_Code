@@ -59,6 +59,7 @@ public class AutoReset extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            
             telemetry.addData("encoders", extendMotor.getCurrentPosition());
             telemetry.update();
         }

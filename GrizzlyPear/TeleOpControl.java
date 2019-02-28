@@ -62,7 +62,7 @@ public class TeleOpControl extends LinearOpMode {
     DcMotor latchMotor = null;
     DcMotor intakeArm = null;
     DcMotor dumpMotor = null;
-    Servo intake = null;
+    CRServo intake = null;
     
     @Override
     public void runOpMode() {
@@ -73,12 +73,12 @@ public class TeleOpControl extends LinearOpMode {
         latchMotor = hardwareMap.get(DcMotor.class, "latchMotor");
         intakeArm = hardwareMap.get(DcMotor.class, "intakeArm");
         dumpMotor = hardwareMap.get(DcMotor.class, "dumpMotor");
-        intake = hardwareMap.get(Servo.class, "intake");
+        intake = hardwareMap.get(CRServo.class, "intake");
         waitForStart();
 
-        boolean flag = false;
 
         while (opModeIsActive()) {
+            boolean flag = true;
             telemetry.addData("Status", "Initialized");
             telemetry.update();
             
@@ -86,7 +86,6 @@ public class TeleOpControl extends LinearOpMode {
             Motion movement = motion.rightwardsMotion(gamepad1.right_stick_x)
                     .add(motion.forwardMotion(-gamepad1.right_stick_y))
                     .add(motion.rotationMotion(gamepad1.left_stick_x));
-/*
             if (gamepad1.dpad_left) {
                 movement = movement.add(motion.forwardMotion(-0.3));
             }
@@ -100,57 +99,51 @@ public class TeleOpControl extends LinearOpMode {
             if (gamepad1.dpad_down) {
                 movement = movement.add(motion.rightwardsMotion(-0.7));
             }
- */           
             motion.executeRate(movement);
             
-            //Dumping (incomplete as of now)
-            if (gamepad2.b) {
-                double offset = dumpMotor.getCurrentPosition();
-                //boolean flag1 = false;
-                while (opModeIsActive() && dumpMotor.getCurrentPosition()-offset < 660) {
-                    dumpMotor.setPower(.6);
-                    telemetry.addData("STATUS REPORT", "FIRST");
-                    telemetry.addData("ENCODERS REPORT", dumpMotor.getCurrentPosition()-offset);
-                    telemetry.update();
+            // Intake Arm(out)
+            if (gamepad2.a) {
+                if (flag==true) {
+                    flag=false;
+                    flipOut();
                 }
-                while (opModeIsActive() && dumpMotor.getCurrentPosition()-offset < 680) {
-                    dumpMotor.setPower(.3);
-                    telemetry.addData("STATUS REPORT", "SECOND");
-                    telemetry.addData("ENCODERS REPORT", dumpMotor.getCurrentPosition()-offset);
-                    telemetry.update();
-                }
-                /*while (opModeIsActive() && dumpMotor.getCurrentPosition()-offset < -110) {
-                    dumpMotor.setPower(.4);
-                    telemetry.addData("STATUS REPORT", "THIRD", dumpMotor.getCurrentPosition());
-                    telemetry.update();
-                }
-                sleep(2000);
-                //flag1 = true;
-                while (opModeIsActive() && dumpMotor.getCurrentPosition()-offset < -60) {
-                    dumpMotor.setPower(-.4);
-                    telemetry.addData("STATUS REPORT", "FOURTH", dumpMotor.getCurrentPosition());
-                    telemetry.update();
-                }
-                //flag1 = false;*/
+                flag=true;
             }
             // Intake Arm(in)
-            if (gamepad1.a) {
-                flipOut();
+            if (gamepad2.b) {
+                if (flag==true) {
+                    flag=false;
+                    deposit();
+                }
+                flag=true;
             }
-            // Intake Arm(out)
-            if (gamepad1.b) {
-                deposit();
+            
+            //Scoring Basket
+            if(gamepad1.a){
+                dumpMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                dumpMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                dumpMotor.setTargetPosition(1758);
+                dumpMotor.setPower(.5);
+                
             }
+            if(gamepad1.b){
+                dumpMotor.setPower(1);
+            }    
+            
+            if(gamepad1.x){
+                dumpMotor.setPower(-.5);
+            }
+            
             // Intake
             if (gamepad1.right_trigger > 0) {
-                intake.setPosition(1);
+                intake.setPower(.9);
             }
             // Outtake (these may be switched)
             else if (gamepad1.left_trigger > 0) {
-                intake.setPosition(0);
+                intake.setPower(-.9);
             }
             else {
-                intake.setPosition(0.5);
+                intake.setPower(0);
             }
             
             //Extensions
@@ -159,25 +152,29 @@ public class TeleOpControl extends LinearOpMode {
             //Latching
             latchMotor.setPower(gamepad2.left_stick_y);
         }
-    }
-    public void flipOut() {
-        double offset = intakeArm.getCurrentPosition();
-        while (opModeIsActive() && intakeArm.getCurrentPosition()-offset > -75) {
+
+}
+     public void deposit() {
+          double offset = intakeArm.getCurrentPosition();
+          while (opModeIsActive() && 
+          intakeArm.getCurrentPosition()-offset < 108 && !gamepad1.x) 
+          {
             intakeArm.setPower(-1);
+            telemetry.addData("Encoders", intakeArm.getCurrentPosition()-offset);
+            telemetry.update();
+            
+          }
+          intakeArm.setPower(0);
         }
-        while (opModeIsActive() && intakeArm.getCurrentPosition()-offset > -95) {
-            intakeArm.setPower(.3);    
+        public void flipOut() {
+           double offset = intakeArm.getCurrentPosition();
+           while (opModeIsActive() && intakeArm.getCurrentPosition()-offset > -95 && !gamepad1.x) {
+            intakeArm.setPower(.7);
+            telemetry.addData("Encoders", intakeArm.getCurrentPosition()-offset);
+            telemetry.update();
+            
+           }
+        
         }
-        intakeArm.setPower(0);
-    }
-    public void deposit() {
-        double offset = intakeArm.getCurrentPosition();
-        while (opModeIsActive() && intakeArm.getCurrentPosition()-offset < 75) {
-            intakeArm.setPower(1);
-        }
-        while (opModeIsActive() && intakeArm.getCurrentPosition()-offset < 95) {
-            intakeArm.setPower(-.3);    
-        }
-        intakeArm.setPower(0);
-    }
+        
 }

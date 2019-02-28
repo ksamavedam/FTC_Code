@@ -52,12 +52,6 @@ public class AutonomousDepot extends LinearOpMode {
         } else {
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
-        rh.extendMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rh.extendMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rh.intakeArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rh.intakeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rh.dumpMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rh.dumpMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         resetRunMode();
 
         rh.latchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -78,14 +72,14 @@ public class AutonomousDepot extends LinearOpMode {
             double position = 5;
 
             //Lower Robot
-            //lowerPear();
-
+            lowerPear();
+            shakeyshakey();
 
             //Move to gold detection
             //Detect Gold Mineral
             while (opModeIsActive() && position == 5) {
-                //position = sampling(); // -1 : Left, 0: Center ; 1: Right
-                position = 10;
+                position = sampling(); // -1 : Left, 0: Center ; 1: Right
+                //position = 10;
             }
             //Run over gold mineral
             //Left gold
@@ -116,6 +110,7 @@ public class AutonomousDepot extends LinearOpMode {
             }
             else if (position == 10) {
                 ParkArm();
+                break;
             }
             //Center gold
             else if (position == 0) {
@@ -158,7 +153,7 @@ public class AutonomousDepot extends LinearOpMode {
                 resetRunMode();
                 
                 //Go towards wall
-                encoders = verticalEncoder(41);
+                encoders = verticalEncoder(41.5);
                 move(0, encoders, 0);
                 resetRunMode();
             }
@@ -195,7 +190,7 @@ public class AutonomousDepot extends LinearOpMode {
 
             // Park
             encoders = verticalEncoder(72);
-            move(0, encoders, 0);
+            move(2, encoders, 0);
             resetRunMode();
 
 
@@ -229,19 +224,12 @@ public class AutonomousDepot extends LinearOpMode {
                 rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     public void shakeyshakey(){
-        int encoders = verticalEncoder(1);
+        int encoders = verticalEncoder(.5);
         move(0, encoders, 0);
-        encoders = verticalEncoder(1);
+        encoders = verticalEncoder(.5);
         move(180, encoders, 0);
     }
     public int sampling(){
-        initVuforia();
-
-        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
-            initTfod();
-        } else {
-            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
-        }
         int position = -1;
         if (opModeIsActive()) {
             if (tfod != null) {
@@ -484,21 +472,27 @@ public class AutonomousDepot extends LinearOpMode {
         sleep(2000);
     }
     public void ParkArm(){
-        rh.extendMotor.setTargetPosition(-880);
-        rh.extendMotor.setPower(-.5);
-        rh.intakeArm.setPower(0);
-        while (opModeIsActive() && rh.extendMotor.isBusy()) {
+        double offset = rh.extendMotor.getCurrentPosition();
+        rh.extendMotor.setPower(.5);
+        while (opModeIsActive() && rh.extendMotor.getCurrentPosition()-offset > -500) {
+            telemetry.addData("Encoders", rh.extendMotor.getCurrentPosition()-offset);
+            telemetry.update();
         }
         rh.extendMotor.setPower(0);
-        rh.intakeArm.setTargetPosition(-150);
-        rh.intakeArm.setPower(-.5);
-        while (opModeIsActive() && rh.intakeArm.isBusy()) {
+        offset = rh.intakeArm.getCurrentPosition();
+        rh.intakeArm.setPower(.5);
+        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset > -150) {
+            telemetry.addData("Encoders", rh.intakeArm.getCurrentPosition()-offset);
+            telemetry.update();
         }
-        rh.intakeArm.setPower(0);/*
-        rh.dumpMotor.setTargetPosition(-1950);
-        rh.dumpMotor.setPower(-.5);
-        while (opModeIsActive() && rh.dumpMotor.isBusy()) {
+        rh.intakeArm.setPower(0);
+        sleep(1000);
+        offset = rh.dumpMotor.getCurrentPosition();
+        rh.dumpMotor.setPower(-1);
+        while (opModeIsActive() && rh.dumpMotor.getCurrentPosition()-offset > -1950) {
+            telemetry.addData("Encoders", rh.dumpMotor.getCurrentPosition()-offset);
+            telemetry.update();
         }
-        rh.dumpMotor.setPower(0);*/
+        rh.dumpMotor.setPower(0);
     }
 }
