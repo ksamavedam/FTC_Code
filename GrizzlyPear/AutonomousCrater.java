@@ -78,7 +78,7 @@ public class AutonomousCrater extends LinearOpMode {
             double position = 5;
 
             //Lower Robot
-            lowerPear();
+            //lowerPear();
             shakeyshakey();
 
             //Move to gold detection
@@ -100,7 +100,7 @@ public class AutonomousCrater extends LinearOpMode {
                 resetRunMode();
                 
                 //nudge the gold
-                encoders = horizontalEncoder(10);
+                encoders = horizontalEncoder(12);
                 move(270, encoders, 0);
                 resetRunMode();
                 
@@ -110,7 +110,7 @@ public class AutonomousCrater extends LinearOpMode {
                 resetRunMode();
                 
                 //move forward
-                encoders = verticalEncoder(24);
+                encoders = verticalEncoder(25);
                 move(0, encoders, 0);
                 resetRunMode();
             }
@@ -130,7 +130,7 @@ public class AutonomousCrater extends LinearOpMode {
                 resetRunMode();
 
                 // Go towards wall  - forward
-                encoders = verticalEncoder(24);
+                encoders = verticalEncoder(42);
                 move(0, encoders, 0);
                 resetRunMode();
                 telemetry.addData("Status", "TURN 40");
@@ -158,32 +158,23 @@ public class AutonomousCrater extends LinearOpMode {
                 resetRunMode();
                 
                 //Go towards wall
-                encoders = verticalEncoder(41);
+                encoders = verticalEncoder(60);
                 move(0, encoders, 0);
                 resetRunMode();
             }
 
             // Common
-            rotate(60);
+            rotate(126);
             resetRunMode();
             telemetry.addData("Status", "Vert 16");
             telemetry.update();
 
-            /*encoders = verticalEncoder(32);
-            move(0, encoders, 0);
+            encoders = verticalEncoder(30);
+            move(180, encoders, 0);
             resetRunMode();
 
             telemetry.addData("Status", "HZ 40");
             telemetry.update();
-
-            // Go to depot
-            encoders = horizontalEncoder(40);
-            move(270, encoders, 0);
-            resetRunMode();
-            telemetry.addData("Status", "TURN -90");
-            telemetry.update();
-            rotate(-90);
-            resetRunMode();
 
             // Claim Depot
             telemetry.addData("Status", "Claim");
@@ -193,15 +184,17 @@ public class AutonomousCrater extends LinearOpMode {
             telemetry.addData("Status", "Park");
             telemetry.update();
 
+            rotate(-2);
+            resetRunMode();
             // Park
-            encoders = verticalEncoder(72);
+            encoders = verticalEncoder(58);
             move(0, encoders, 0);
             resetRunMode();
 
 
 
             //Extend arm into crater
-            ParkArm();*/
+            //ParkArm();
             // Show the elapsed game time
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
@@ -473,7 +466,7 @@ public class AutonomousCrater extends LinearOpMode {
     public void claimDepot(){
         telemetry.addData("status", "Depot");
             telemetry.update();
-        rh.depot.setPosition(1);
+        rh.depot.setPosition(0);
         sleep(2000);
     }
     public void ParkArm(){
