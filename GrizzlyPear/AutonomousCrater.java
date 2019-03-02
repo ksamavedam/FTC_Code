@@ -52,12 +52,7 @@ public class AutonomousCrater extends LinearOpMode {
         } else {
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
-        rh.extendMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rh.extendMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rh.intakeArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rh.intakeArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rh.dumpMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rh.dumpMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        
         resetRunMode();
 
         rh.latchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -78,7 +73,7 @@ public class AutonomousCrater extends LinearOpMode {
             double position = 5;
 
             //Lower Robot
-            //lowerPear();
+            lowerPear();
             shakeyshakey();
 
             //Move to gold detection
@@ -116,21 +111,22 @@ public class AutonomousCrater extends LinearOpMode {
             }
             else if (position == 10) {
                 ParkArm();
+                break;
             }
             //Center gold
             else if (position == 0) {
                 // nudge the gold
-                encoders = horizontalEncoder(30);
+                encoders = horizontalEncoder(27);
                 move(270, encoders, 0);
                 resetRunMode();
 
                 // Go back
-                encoders = horizontalEncoder(14);
+                encoders = horizontalEncoder(8);
                 move(90, encoders, 0);
                 resetRunMode();
 
                 // Go towards wall  - forward
-                encoders = verticalEncoder(42);
+                encoders = verticalEncoder(41);
                 move(0, encoders, 0);
                 resetRunMode();
                 telemetry.addData("Status", "TURN 40");
@@ -148,17 +144,17 @@ public class AutonomousCrater extends LinearOpMode {
                 resetRunMode();
                 
                 //nudge gold
-                encoders = horizontalEncoder(15);
+                encoders = horizontalEncoder(12);
                 move(270, encoders, 0);
                 resetRunMode();
                 
                 //go back
-                encoders = horizontalEncoder(13);
+                encoders = horizontalEncoder(8);
                 move(90, encoders, 0);
                 resetRunMode();
                 
                 //Go towards wall
-                encoders = verticalEncoder(60);
+                encoders = verticalEncoder(57);
                 move(0, encoders, 0);
                 resetRunMode();
             }
@@ -184,17 +180,15 @@ public class AutonomousCrater extends LinearOpMode {
             telemetry.addData("Status", "Park");
             telemetry.update();
 
-            rotate(-2);
-            resetRunMode();
             // Park
             encoders = verticalEncoder(58);
-            move(0, encoders, 0);
+            move(359, encoders, 0);
             resetRunMode();
 
 
 
             //Extend arm into crater
-            //ParkArm();
+            ParkArm();
             // Show the elapsed game time
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
@@ -465,8 +459,8 @@ public class AutonomousCrater extends LinearOpMode {
     }
     public void claimDepot(){
         telemetry.addData("status", "Depot");
-            telemetry.update();
-        rh.depot.setPosition(0);
+        telemetry.update();
+        rh.depot.setPosition(0.5);
         sleep(2000);
     }
     public void ParkArm(){
@@ -479,15 +473,15 @@ public class AutonomousCrater extends LinearOpMode {
         rh.extendMotor.setPower(0);
         offset = rh.intakeArm.getCurrentPosition();
         rh.intakeArm.setPower(.5);
-        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset > -150) {
+        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset > -50) {
             telemetry.addData("Encoders", rh.intakeArm.getCurrentPosition()-offset);
             telemetry.update();
         }
         rh.intakeArm.setPower(0);
         sleep(1000);
         offset = rh.dumpMotor.getCurrentPosition();
-        rh.dumpMotor.setPower(-1);
-        while (opModeIsActive() && rh.dumpMotor.getCurrentPosition()-offset > -1950) {
+        rh.dumpMotor.setPower(1);
+        while (opModeIsActive() && rh.dumpMotor.getCurrentPosition()-offset > -800) {
             telemetry.addData("Encoders", rh.dumpMotor.getCurrentPosition()-offset);
             telemetry.update();
         }

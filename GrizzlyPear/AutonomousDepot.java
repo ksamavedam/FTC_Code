@@ -46,7 +46,7 @@ public class AutonomousDepot extends LinearOpMode {
                     this.sleep(50);
         }
         initVuforia();
-
+        
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
         } else {
@@ -109,7 +109,7 @@ public class AutonomousDepot extends LinearOpMode {
                 resetRunMode();
             }
             else if (position == 10) {
-                ParkArm();
+                claimDepot();
                 break;
             }
             //Center gold
@@ -468,7 +468,7 @@ public class AutonomousDepot extends LinearOpMode {
     public void claimDepot(){
         telemetry.addData("status", "Depot");
             telemetry.update();
-        rh.depot.setPosition(1);
+        rh.depot.setPosition(0.5);
         sleep(2000);
     }
     public void ParkArm(){
@@ -481,7 +481,7 @@ public class AutonomousDepot extends LinearOpMode {
         rh.extendMotor.setPower(0);
         offset = rh.intakeArm.getCurrentPosition();
         rh.intakeArm.setPower(.5);
-        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset > -150) {
+        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset > -50) {
             telemetry.addData("Encoders", rh.intakeArm.getCurrentPosition()-offset);
             telemetry.update();
         }
@@ -489,7 +489,7 @@ public class AutonomousDepot extends LinearOpMode {
         sleep(1000);
         offset = rh.dumpMotor.getCurrentPosition();
         rh.dumpMotor.setPower(-1);
-        while (opModeIsActive() && rh.dumpMotor.getCurrentPosition()-offset > -1950) {
+        while (opModeIsActive() && rh.dumpMotor.getCurrentPosition()-offset > -800) {
             telemetry.addData("Encoders", rh.dumpMotor.getCurrentPosition()-offset);
             telemetry.update();
         }

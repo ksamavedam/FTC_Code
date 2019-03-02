@@ -74,28 +74,24 @@ public class TeleOpControl extends LinearOpMode {
         intakeArm = hardwareMap.get(DcMotor.class, "intakeArm");
         dumpMotor = hardwareMap.get(DcMotor.class, "dumpMotor");
         intake = hardwareMap.get(CRServo.class, "intake");
+        
+        extendMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extendMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         waitForStart();
 
 
         while (opModeIsActive()) {
             boolean flag = true;
             telemetry.addData("Status", "Initialized");
-            telemetry.addData("Dump Encoder ",dumpMotor.getCurrentPosition());
+            telemetry.addData("Slide Encoders", extendMotor.getCurrentPosition());
             telemetry.update();
 
-            // Krishna Added for Harbin 
-                dumpMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                dumpMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                dumpMotor.setPower(gamepad1.right_stick_x * 0.75);
-                //if (1)
-                //continue;
-            
             //MAANAV'S CONTROLS (GAMEPAD1)
             
             //Moving (fast)
             Motion movement = motion.rightwardsMotion(gamepad1.right_stick_x)
                     .add(motion.forwardMotion(-gamepad1.right_stick_y))
-                    .add(motion.rotationMotion(gamepad1.left_stick_x));
+                    .add(motion.rotationMotion(gamepad1.left_stick_x*.7));
                     
             //Moving (slow)
             if (gamepad1.dpad_left) {
@@ -105,26 +101,23 @@ public class TeleOpControl extends LinearOpMode {
                 movement = movement.add(motion.forwardMotion(0.3));
             }
             if (gamepad1.dpad_up) {
-                movement = movement.add(motion.rightwardsMotion(0.7));
+                movement = movement.add(motion.rightwardsMotion(-0.7));
             }
             if (gamepad1.dpad_down) {
-                movement = movement.add(motion.rightwardsMotion(-0.7));
+                movement = movement.add(motion.rightwardsMotion(0.7));
             }
             
             motion.executeRate(movement);
             
-            //Scoring Basket (Incomplete)
-            if(gamepad1.b){
-                dumpMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                dumpMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                dumpMotor.setTargetPosition(1758);
+            //Scoring Basket
+            while(gamepad1.b){
                 dumpMotor.setPower(.5);
-                while (opModeIsActive() && dumpMotor.isBusy()) {
-                    telemetry.addData("Encoders", dumpMotor.getCurrentPosition());
-                    telemetry.update();
-                }
-                dumpMotor.setPower(0);
+            }    
+            while(gamepad1.x){
+                dumpMotor.setPower(-.6);
             }
+            dumpMotor.setPower(0);
+            
             
             //HARBIN'S CONTROLS (GAMEPAD2)
             
@@ -132,33 +125,56 @@ public class TeleOpControl extends LinearOpMode {
             latchMotor.setPower(gamepad2.right_stick_y);
             
             //Linear Slides (Fast)
-            if (Math.abs(gamepad2.left_stick_x) > 0) {
-                extendMotor.setPower(gamepad2.left_stick_x);
+            if (Math.abs(gamepad2.left_stick_y) > 0) {
+                extendMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);
+                extendMotor.setPower(-gamepad2.left_stick_y);
             }
             
             //Linear Slides (Slow)
-            else if (gamepad2.dpad_right) {
-                extendMotor.setPower(.5);
+            //Out
+            else if (gamepad2.dpad_up) {
+                extendMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);
+                extendMotor.setPower(.7);
             }
-            else if (gamepad2.dpad_left) {
-                extendMotor.setPower(-.5);
+            //In
+            else if (gamepad2.dpad_down) {
+                extendMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODERS);
+                extendMotor.setPower(-.7);
             }
             else {
                 extendMotor.setPower(0);
             }
             
+            //Slides to Position
+            /*if (gamepad2.y) {
+                extendMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                extendMotor.setTargetPosition(-1050);
+                if (extendMotor.getCurrentPosition() > -1050) {
+                    extendMotor.setPower(.5);
+                }
+                else if (extendMotor.getCurrentPosition() < -1050) {
+                    extendMotor.setPower(.5);
+                }
+                while (opModeIsActive() && extendMotor.isBusy() && !gamepad2.x) {
+                    telemetry.addData("Slide Encoders", extendMotor.getCurrentPosition());
+                    telemetry.update();
+                }
+                extendMotor.setPower(0);
+            }*/
+            
             // Intake Arm(in)
-            if (gamepad2.y) {
-                if (flag==true) {
+            if (gamepad2.b) {
+                /*if (flag==true) {
                     flag=false;
                     flipIn();
-                }
-                flag=true;
+                    flag=true;
+                }*/
+                intakeArm.setPower(-.8);
             }
             
             // Intake Arm(out)
-            if (gamepad2.x) {
-                if (flag==true) {
+            else if (gamepad2.a) {
+                /*if (flag==true) {
                     flag=false;
                     //Bring slides to deposit position
                     double slideOffset = extendMotor.getCurrentPosition();
@@ -168,8 +184,12 @@ public class TeleOpControl extends LinearOpMode {
                     extendMotor.setPower(0);
                     //Flip in intake arm
                     flipOut();
-                }
-                flag=true;
+                    flag=true;
+                }*/
+                intakeArm.setPower(.5);
+            }
+            else {
+                intakeArm.setPower(0);
             }
             
             // Intake
@@ -189,18 +209,22 @@ public class TeleOpControl extends LinearOpMode {
     }
     public void flipIn() {
         double offset = intakeArm.getCurrentPosition();
-        while (opModeIsActive() && intakeArm.getCurrentPosition()-offset < 108 && !gamepad1.x) {
-        intakeArm.setPower(-1);
-        telemetry.addData("Encoders", intakeArm.getCurrentPosition()-offset);
-        telemetry.update();
+        while (opModeIsActive() && intakeArm.getCurrentPosition()-offset < 80 && !gamepad2.b) {
+            //intakeArm.setPower(-.7);
+            telemetry.addData("Condition", intakeArm.getCurrentPosition()-offset);
+            telemetry.addData("InEncoders", intakeArm.getCurrentPosition());
+            telemetry.addData("offset", offset);
+            telemetry.update();
         }
         intakeArm.setPower(0);
     }
     public void flipOut() {
         double offset = intakeArm.getCurrentPosition();
-        while (opModeIsActive() && intakeArm.getCurrentPosition()-offset > -95 && !gamepad1.x) {
-            intakeArm.setPower(.7);
-            telemetry.addData("Encoders", intakeArm.getCurrentPosition()-offset);
+        while (opModeIsActive() && intakeArm.getCurrentPosition()-offset > -50 && !gamepad2.b) {
+            //intakeArm.setPower(.7);
+            telemetry.addData("Condition", intakeArm.getCurrentPosition()-offset);
+            telemetry.addData("OutEncoders", intakeArm.getCurrentPosition());
+            telemetry.addData("offset", offset);
             telemetry.update();
         }
         intakeArm.setPower(0);
