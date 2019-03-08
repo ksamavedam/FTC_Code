@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
 import java.util.Arrays;
 import com.qualcomm.robotcore.robot.Robot;
@@ -38,17 +41,28 @@ public class AutonomousTest1 extends LinearOpMode {
     public void runOpMode(){
         rh = new RobotHardware("GrizzlyPear", hardwareMap);
         mwm = new MecanumMath(rh);
-        rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //rh.latchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //rh.latchMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        
+
+        if(!rh.imu.isGyroCalibrated()){
+                    this.sleep(50);
+        }
+        initVuforia();
+
+        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+            initTfod();
+        } else {
+            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
+        }
+        resetRunMode();
+
+        rh.extendMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rh.extendMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        rh.intakeArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rh.intakeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        rh.dumpMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rh.dumpMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        rh.latchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rh.latchMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         waitForStart();
@@ -62,267 +76,143 @@ public class AutonomousTest1 extends LinearOpMode {
             double Power3;
             double Power4;
             double position = 5;
-            //Lower Robot
-            //lowerPear();
-            //Move to gold detection
+
             //Detect Gold Mineral
             while (opModeIsActive() && position == 5) {
-                position = 0;
+                position = sampling(); // -1 : Left, 0: Center ; 1: Right
+                //position = 10;
             }
+            //Lower Robot
+            lowerPear();
+            
+            shakeyshakey();
+
+            //Move to gold detection
+
             //Run over gold mineral
             //Left gold
             if (position == -1) {
-                encoders = horizontalEncoder(18);
-                move(264, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                //move towards gold
+                encoders = horizontalEncoder(15);
+                move(270, encoders, 0);
+                resetRunMode();
                 
-                /*
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                */
                 encoders = verticalEncoder(16);
                 move(0, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = horizontalEncoder(24);
-                move(268, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = rotationEncoder(23);
-                rotate(encoders);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = horizontalEncoder(18);
-                move(264, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                //claimDepot();
-                encoders = rotationEncoder(-65);
-                rotate(encoders);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = rotationEncoder(24);
-                rotate(encoders);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = verticalEncoder(5);
+                resetRunMode();
+                
+                //nudge the gold
+                encoders = horizontalEncoder(15);
+                move(270, encoders, 0);
+                resetRunMode();
+                
+                //go back
+                encoders = horizontalEncoder(13);
+                move(90, encoders, 0);
+                resetRunMode();
+                
+                //move forward
+                encoders = verticalEncoder(13);
                 move(0, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = verticalEncoder(50);
-                move(0, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                /*rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
+                resetRunMode();
+            }
+            else if (position == 10) {
+                ParkArm();
+                break;
             }
             //Center gold
-            if (position == 0) {
-                /*encoders = horizontalEncoder(50);
+            else if (position == 0) {
+                // nudge the gold
+                encoders = horizontalEncoder(28);
                 move(270, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
-                //claimDepot();
-                encoders = rotationEncoder(-50);
-                rotate(encoders);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                /*rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
-                encoders = rotationEncoder(-45);
-                rotate(encoders);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = verticalEncoder(5);
-                move(180, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = verticalEncoder(50);
+                resetRunMode();
+
+                // Go back
+                encoders = horizontalEncoder(11);
+                move(90, encoders, 0);
+                resetRunMode();
+
+                // Go towards wall  - forward
+                encoders = verticalEncoder(29);
                 move(0, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                /*rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
+                resetRunMode();
+                telemetry.addData("Status", "TURN 40");
+                telemetry.update();
             }
             //Right gold
             else {
-                encoders = horizontalEncoder(18);
-                move(264, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = verticalEncoder(15);
+                //move towards gold
+                encoders = horizontalEncoder(15);
+                move(270, encoders, 0);
+                resetRunMode();
+                
+                encoders = verticalEncoder(16);
                 move(180, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = horizontalEncoder(31);
-                move(264, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = rotationEncoder(-21.5);
-                rotate(encoders);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = horizontalEncoder(18);
-                move(264, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = rotationEncoder(-35);
-                rotate(encoders);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                //claimDepot();
-                encoders = verticalEncoder(3);
-                move(180, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = horizontalEncoder(18);
-                move(264, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                encoders = verticalEncoder(50);
+                resetRunMode();
+                
+                //nudge gold
+                encoders = horizontalEncoder(15);
+                move(270, encoders, 0);
+                resetRunMode();
+                
+                //go back
+                encoders = horizontalEncoder(13);
+                move(90, encoders, 0);
+                resetRunMode();
+                
+                //Go towards wall
+                encoders = verticalEncoder(45);
                 move(0, encoders, 0);
-                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                /*rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);*/
+                resetRunMode();
             }
+
+            // Common
+            rotate(40);
+            resetRunMode();
+            telemetry.addData("Status", "Vert 16");
+            telemetry.update();
+
+            encoders = verticalEncoder(11);
+            move(0, encoders, 0);
+            resetRunMode();
+
+            telemetry.addData("Status", "HZ 40");
+            telemetry.update();
+
+            // Go to depot
+            rotate(-82);
+            resetRunMode();
+            encoders = verticalEncoder(42);
+            move(179, encoders, 0);
+            resetRunMode();
+            telemetry.addData("Status", "TURN -90");
+            telemetry.update();
+
+            // Claim Depot
+            telemetry.addData("Status", "Claim");
+            telemetry.update();
+
+            claimDepot();
+            telemetry.addData("Status", "Park");
+            telemetry.update();
+
+            // Park
+            encoders = verticalEncoder(47);
+            move(2, encoders, 0);
+            resetRunMode();
+            rotate(180);
+            resetRunMode();
+
+
             //Extend arm into crater
-            //extendFull();
+            ParkArm();
             // Show the elapsed game time
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
+            break;
         }
     }
-    /*public void lowerPear(){
+    public void lowerPear(){
         rh.latchMotor.setTargetPosition(-9450);
         rh.latchMotor.setPower(-1);
         while (opModeIsActive() && rh.latchMotor.isBusy()){
@@ -330,27 +220,32 @@ public class AutonomousTest1 extends LinearOpMode {
             telemetry.update();
         }
         rh.latchMotor.setPower(0);
-    }*/
+    }
+
+    public void resetRunMode() {
+                rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                rh.motor3.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                rh.motor4.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                rh.motor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rh.motor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rh.motor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
     public void shakeyshakey(){
-        int encoders = verticalEncoder(1);
+        int encoders = verticalEncoder(.5);
         move(0, encoders, 0);
-        encoders = verticalEncoder(1);
+        encoders = verticalEncoder(.5);
         move(180, encoders, 0);
     }
     public int sampling(){
-        initVuforia();
-
-        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
-            initTfod();
-        } else {
-            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
-        }
         int position = -1;
+        int count = 0;
         if (opModeIsActive()) {
             if (tfod != null) {
                 tfod.activate();
             }
-        
+
             while (opModeIsActive()) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
@@ -358,6 +253,11 @@ public class AutonomousTest1 extends LinearOpMode {
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
                         telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        telemetry.addData("count", count);
+                        count++;
+                        if (count > 100) {
+                            return 0;
+                        }
                         int goldMineralX = -1;
                         int silverMineral1X = -1;
                         Recognition lowest = null;
@@ -376,9 +276,9 @@ public class AutonomousTest1 extends LinearOpMode {
                         List<Recognition> lowests = Arrays.asList(lowest, secondLowest);
                         for (Recognition recognition : lowests) {
                             if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldMineralX = (int) recognition.getTop();
+                                goldMineralX = (int) recognition.getRight();
                             } else if (silverMineral1X == -1) {
-                                silverMineral1X = (int) recognition.getTop();
+                                silverMineral1X = (int) recognition.getRight();
                             }
                         }
                         if (goldMineralX == -1) {
@@ -492,86 +392,115 @@ public class AutonomousTest1 extends LinearOpMode {
             rh.motor4.setTargetPosition(-encoders);
         }
         while (opModeIsActive() && rh.motor1.isBusy()){
-            telemetry.addData("power1", Power1);
+ /*           telemetry.addData("power1", Power1);
             telemetry.addData("power2", Power2);
             telemetry.addData("power3", Power3);
             telemetry.addData("power4", Power4);
             telemetry.addData("status", "moving");
             telemetry.update();
-            
+*/
         }
         rh.motor1.setPower(0);
         rh.motor2.setPower(0);
         rh.motor3.setPower(0);
         rh.motor4.setPower(0);
     }
-    public void rotate(int encoders) {
+    public void rotate(double degrees) {
         double Power1;
         double Power2;
         double Power3;
         double Power4;
-        Power1 = -mwm.power1(0, .2, 0);
-        Power2 = mwm.power2(0, .2, 0);
-        Power3 = -mwm.power3(0, .2, 0);
-        Power4 = mwm.power4(0, .2, 0);
-        if (Power1 > 1) {
-            Power1 = Power1/3;
-            Power2 = Power2/3;
-            Power3 = Power3/3;
-            Power4 = Power4/3;
+        double angleAtStart = rh.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        double angleTurned = 0;
+        double correctionAngle = 6; // For power of 0.3
+        double basePower = 0.3;
+
+        rh.motor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rh.motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rh.motor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rh.motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rh.motor3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rh.motor3.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rh.motor4.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rh.motor4.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        if(degrees > 0) {
+            Power1 = basePower ;
+            Power2 = -basePower ;
+            Power3 = -basePower ;
+            Power4 = basePower;
+            degrees -= correctionAngle;
         }
+        else {
+            Power1 = -basePower ;
+            Power2 = basePower ;
+            Power3 = basePower ;
+            Power4 = -basePower;
+            degrees += correctionAngle;
+        }
+
         rh.motor1.setPower(Power1);
         rh.motor2.setPower(Power2);
         rh.motor3.setPower(Power3);
         rh.motor4.setPower(Power4);
-        if (Power1 > 0) {
-            rh.motor1.setTargetPosition(encoders);
-        }
-        else {
-            rh.motor1.setTargetPosition(-encoders);
-        }
-        if (Power2 > 0) {
-            rh.motor2.setTargetPosition(encoders);
-        }
-        else {
-            rh.motor2.setTargetPosition(-encoders);
-        }
-        if (Power3 > 0) {
-            rh.motor3.setTargetPosition(encoders);
-        }
-        else {
-            rh.motor3.setTargetPosition(-encoders);
-        }
-        if (Power4 > 0) {
-            rh.motor4.setTargetPosition(encoders);
-        }
-        else {
-            rh.motor4.setTargetPosition(-encoders);
-        }
-        while (opModeIsActive() && rh.motor1.isBusy()){
+
+
+
+        while (opModeIsActive()&& Math.abs(angleTurned) < Math.abs(degrees)) {
+
+            angleTurned = rh.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - angleAtStart;
+
             telemetry.addData("power1", Power1);
             telemetry.addData("power2", Power2);
             telemetry.addData("power3", Power3);
             telemetry.addData("power4", Power4);
+            telemetry.addData("angleAtStart", angleAtStart);
+            telemetry.addData("anglesFinal", degrees);
+            telemetry.addData("anglesCurrent", angleTurned);
             telemetry.addData("status", "rotating");
             telemetry.update();
         }
+
         rh.motor1.setPower(0);
         rh.motor2.setPower(0);
         rh.motor3.setPower(0);
         rh.motor4.setPower(0);
-    }
-    /*public void claimDepot(){
-        rh.depot.setPosition(0);
-        sleep(50);
-        rh.depot.setPosition(1);
-        sleep(50);
-    }*/
-    /*public void extendFull(){
-        rh.minShoulder.setPower(-2/3);
-        rh.minShoulder.setTargetPosition(0);
-        while (opModeIsActive() && rh.minShoulder.isBusy()){
+/*
+        while (opModeIsActive()){
+              angleTurned = rh.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - angleAtStart;
+              telemetry.addData("power1", Power1);
+            telemetry.addData("power2", Power2);
+            telemetry.addData("power3", Power3);
+            telemetry.addData("power4", Power4);
+            telemetry.addData("angleAtStart", angleAtStart);
+            telemetry.addData("anglesFinal", degrees);
+            telemetry.addData("anglesCurrent", angleTurned);
+            telemetry.addData("status", "rotating");
+            telemetry.update();
         }
-        rh.minShoulder.setPower(0);
-    }*/
+*/
+    }
+    public void claimDepot(){
+        telemetry.addData("status", "Depot");
+            telemetry.update();
+        rh.depot.setPosition(0.5);
+        sleep(2000);
+    }
+    public void ParkArm(){
+        double offset = rh.extendMotor.getCurrentPosition();
+        rh.extendMotor.setPower(.5);
+        while (opModeIsActive() && rh.extendMotor.getCurrentPosition()-offset > -500) {
+            telemetry.addData("Encoders", rh.extendMotor.getCurrentPosition()-offset);
+            telemetry.update();
+        }
+        rh.extendMotor.setPower(0);
+        offset = rh.intakeArm.getCurrentPosition();
+        rh.intakeArm.setPower(-.5);
+        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset < 80) {
+            telemetry.addData("IntakeEncoders", rh.intakeArm.getCurrentPosition()-offset);
+            telemetry.update();
+        }
+        rh.intakeArm.setPower(0);
+        rh.intake.setPower(-1);
+    }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -34,6 +35,7 @@ public class RobotHardware {
     // The IMU sensor object
     BNO055IMU imu;
     Servo depot = null;
+    CRServo intake = null;
     HardwareMap hwMap = null;
 
     public  RobotHardware(String name, HardwareMap hw) {
@@ -83,6 +85,7 @@ public class RobotHardware {
         intakeArm = hwMap.get(DcMotor.class, "intakeArm");
         extendMotor = hwMap.get(DcMotor.class, "extendMotor");
         depot = hwMap.get(Servo.class, "depot");
+        intake = hwMap.get(CRServo.class, "intake");
         dumpMotor = hwMap.get(DcMotor.class, "dumpMotor");
         motor2.setDirection(DcMotor.Direction.REVERSE);
         motor3.setDirection(DcMotor.Direction.REVERSE);

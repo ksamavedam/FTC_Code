@@ -82,6 +82,7 @@ public class TeleOpControl extends LinearOpMode {
 
         while (opModeIsActive()) {
             boolean flag = true;
+            boolean dumping = false;
             telemetry.addData("Status", "Initialized");
             telemetry.addData("Slide Encoders", extendMotor.getCurrentPosition());
             telemetry.update();
@@ -90,7 +91,7 @@ public class TeleOpControl extends LinearOpMode {
             
             //Moving (fast)
             Motion movement = motion.rightwardsMotion(gamepad1.right_stick_x)
-                    .add(motion.forwardMotion(-gamepad1.right_stick_y))
+                    .add(motion.forwardMotion(-gamepad1.right_stick_y*.7))
                     .add(motion.rotationMotion(gamepad1.left_stick_x*.7));
                     
             //Moving (slow)
@@ -110,14 +111,39 @@ public class TeleOpControl extends LinearOpMode {
             motion.executeRate(movement);
             
             //Scoring Basket
-            while(gamepad1.b){
+            //Dumping with encoders
+            /*if (gamepad1.b && dumping==false) {
+                dumping = true;
+                dumpMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                dumpMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                dumpMotor.setTargetPosition(900);
                 dumpMotor.setPower(.5);
+                while (opModeIsActive() && dumpMotor.isBusy() && !gamepad1.x) {
+                    telemetry.addData("Dump Encoders", dumpMotor.getCurrentPosition());
+                    telemetry.update();
+                }
+                sleep(1000);
+                dumpMotor.setTargetPosition(0);
+                dumpMotor.setPower(-.3);
+                while (opModeIsActive() && dumpMotor.isBusy() && !gamepad1.x) {
+                    telemetry.addData("Dump Encoders", dumpMotor.getCurrentPosition());
+                    telemetry.update();
+                }
+                dumpMotor.setPower(0);
+                dumping = false;
+            }*/
+            //Dumping without encoders
+            //Down
+            if(gamepad1.b){
+                dumpMotor.setPower(.4);
             }    
-            while(gamepad1.x){
-                dumpMotor.setPower(-.6);
+            //Up
+            else if(gamepad1.x){
+                dumpMotor.setPower(-.4);
             }
-            dumpMotor.setPower(0);
-            
+            else {
+                dumpMotor.setPower(0);
+            }
             
             //HARBIN'S CONTROLS (GAMEPAD2)
             

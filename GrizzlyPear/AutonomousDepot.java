@@ -46,7 +46,7 @@ public class AutonomousDepot extends LinearOpMode {
                     this.sleep(50);
         }
         initVuforia();
-        
+
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
         } else {
@@ -54,6 +54,12 @@ public class AutonomousDepot extends LinearOpMode {
         }
         resetRunMode();
 
+        rh.extendMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rh.extendMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        rh.intakeArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rh.intakeArm.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
+        rh.dumpMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rh.dumpMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODERS);
         rh.latchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rh.latchMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -70,17 +76,20 @@ public class AutonomousDepot extends LinearOpMode {
             double Power3;
             double Power4;
             double position = 5;
+            double test = 0;
 
-            //Lower Robot
-            lowerPear();
-            shakeyshakey();
-
-            //Move to gold detection
             //Detect Gold Mineral
             while (opModeIsActive() && position == 5) {
                 position = sampling(); // -1 : Left, 0: Center ; 1: Right
                 //position = 10;
             }
+            //Lower Robot
+            lowerPear();
+            
+            shakeyshakey();
+
+            //Move to gold detection
+
             //Run over gold mineral
             //Left gold
             if (position == -1) {
@@ -104,28 +113,28 @@ public class AutonomousDepot extends LinearOpMode {
                 resetRunMode();
                 
                 //move forward
-                encoders = verticalEncoder(8);
+                encoders = verticalEncoder(13);
                 move(0, encoders, 0);
                 resetRunMode();
             }
             else if (position == 10) {
-                claimDepot();
+                ParkArm();
                 break;
             }
             //Center gold
             else if (position == 0) {
                 // nudge the gold
-                encoders = horizontalEncoder(30);
+                encoders = horizontalEncoder(28);
                 move(270, encoders, 0);
                 resetRunMode();
 
                 // Go back
-                encoders = horizontalEncoder(14);
+                encoders = horizontalEncoder(11);
                 move(90, encoders, 0);
                 resetRunMode();
 
                 // Go towards wall  - forward
-                encoders = verticalEncoder(24);
+                encoders = verticalEncoder(29);
                 move(0, encoders, 0);
                 resetRunMode();
                 telemetry.addData("Status", "TURN 40");
@@ -153,7 +162,7 @@ public class AutonomousDepot extends LinearOpMode {
                 resetRunMode();
                 
                 //Go towards wall
-                encoders = verticalEncoder(41.5);
+                encoders = verticalEncoder(45);
                 move(0, encoders, 0);
                 resetRunMode();
             }
@@ -164,7 +173,7 @@ public class AutonomousDepot extends LinearOpMode {
             telemetry.addData("Status", "Vert 16");
             telemetry.update();
 
-            encoders = verticalEncoder(16);
+            encoders = verticalEncoder(11);
             move(0, encoders, 0);
             resetRunMode();
 
@@ -172,13 +181,13 @@ public class AutonomousDepot extends LinearOpMode {
             telemetry.update();
 
             // Go to depot
-            encoders = horizontalEncoder(40);
-            move(270, encoders, 0);
+            rotate(-82);
+            resetRunMode();
+            encoders = verticalEncoder(42);
+            move(180, encoders, 0);
             resetRunMode();
             telemetry.addData("Status", "TURN -90");
             telemetry.update();
-            rotate(-90);
-            resetRunMode();
 
             // Claim Depot
             telemetry.addData("Status", "Claim");
@@ -189,10 +198,11 @@ public class AutonomousDepot extends LinearOpMode {
             telemetry.update();
 
             // Park
-            encoders = verticalEncoder(72);
+            encoders = verticalEncoder(49);
             move(2, encoders, 0);
             resetRunMode();
-
+            rotate(180);
+            resetRunMode();
 
 
             //Extend arm into crater
@@ -474,25 +484,18 @@ public class AutonomousDepot extends LinearOpMode {
     public void ParkArm(){
         double offset = rh.extendMotor.getCurrentPosition();
         rh.extendMotor.setPower(.5);
-        while (opModeIsActive() && rh.extendMotor.getCurrentPosition()-offset > -500) {
+        while (opModeIsActive() && rh.extendMotor.getCurrentPosition()-offset > -700) {
             telemetry.addData("Encoders", rh.extendMotor.getCurrentPosition()-offset);
             telemetry.update();
         }
         rh.extendMotor.setPower(0);
         offset = rh.intakeArm.getCurrentPosition();
-        rh.intakeArm.setPower(.5);
-        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset > -50) {
-            telemetry.addData("Encoders", rh.intakeArm.getCurrentPosition()-offset);
+        rh.intakeArm.setPower(-.5);
+        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset < 80) {
+            telemetry.addData("IntakeEncoders", rh.intakeArm.getCurrentPosition()-offset);
             telemetry.update();
         }
         rh.intakeArm.setPower(0);
-        sleep(1000);
-        offset = rh.dumpMotor.getCurrentPosition();
-        rh.dumpMotor.setPower(-1);
-        while (opModeIsActive() && rh.dumpMotor.getCurrentPosition()-offset > -800) {
-            telemetry.addData("Encoders", rh.dumpMotor.getCurrentPosition()-offset);
-            telemetry.update();
-        }
-        rh.dumpMotor.setPower(0);
+        rh.intake.setPower(-1);
     }
 }
