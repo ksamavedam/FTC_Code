@@ -207,6 +207,8 @@ public class AutonomousDepot extends LinearOpMode {
 
             //Extend arm into crater
             ParkArm();
+            //Lower Landing/Latching
+            raisePear();
             // Show the elapsed game time
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
@@ -222,7 +224,15 @@ public class AutonomousDepot extends LinearOpMode {
         }
         rh.latchMotor.setPower(0);
     }
-
+    public void raisePear() {
+        rh.latchMotor.setTargetPosition(15);
+        rh.latchMotor.setPower(1);
+        while (opModeIsActive() && rh.latchMotor.isBusy()){
+            telemetry.addData("Encoders", rh.latchMotor.getCurrentPosition());
+            telemetry.update();
+        }
+        rh.latchMotor.setPower(0);
+    }
     public void resetRunMode() {
                 rh.motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 rh.motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -241,6 +251,7 @@ public class AutonomousDepot extends LinearOpMode {
     }
     public int sampling(){
         int position = -1;
+        int count = 0;
         if (opModeIsActive()) {
             if (tfod != null) {
                 tfod.activate();
@@ -289,6 +300,8 @@ public class AutonomousDepot extends LinearOpMode {
                     }
                     telemetry.update();
                 }
+                while(count++ > 10000)
+                    return 0;
             }
             if (tfod != null) {
                 tfod.shutdown();
@@ -482,20 +495,16 @@ public class AutonomousDepot extends LinearOpMode {
         sleep(2000);
     }
     public void ParkArm(){
+        
+        rh.extendMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rh.extendMotor.setTargetPosition(-1500);
         double offset = rh.extendMotor.getCurrentPosition();
-        rh.extendMotor.setPower(.5);
-        while (opModeIsActive() && rh.extendMotor.getCurrentPosition()-offset > -700) {
+        rh.extendMotor.setPower(.7);
+        while (opModeIsActive() && rh.extendMotor.getCurrentPosition()-offset > -1500) {
             telemetry.addData("Encoders", rh.extendMotor.getCurrentPosition()-offset);
             telemetry.update();
         }
         rh.extendMotor.setPower(0);
-        offset = rh.intakeArm.getCurrentPosition();
-        rh.intakeArm.setPower(-.5);
-        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset < 80) {
-            telemetry.addData("IntakeEncoders", rh.intakeArm.getCurrentPosition()-offset);
-            telemetry.update();
-        }
-        rh.intakeArm.setPower(0);
-        rh.intake.setPower(-1);
+        
     }
 }

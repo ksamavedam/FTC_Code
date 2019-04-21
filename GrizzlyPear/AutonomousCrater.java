@@ -76,7 +76,7 @@ public class AutonomousCrater extends LinearOpMode {
             //Detect Gold Mineral
             while (opModeIsActive() && position == 5) {
                 position = sampling(); // -1 : Left, 0: Center ; 1: Right
-                //position = 10;
+                // position = 10;
             }
             lowerPear();
             
@@ -225,12 +225,14 @@ public class AutonomousCrater extends LinearOpMode {
     }
     public int sampling(){
         int position = -1;
+        int count = 0 ;
         if (opModeIsActive()) {
             if (tfod != null) {
                 tfod.activate();
             }
 
             while (opModeIsActive()) {
+                
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -273,6 +275,9 @@ public class AutonomousCrater extends LinearOpMode {
                     }
                     telemetry.update();
                 }
+            
+                while(count++ > 10000)
+                    return 0; // Return center if we failed to detect
             }
             if (tfod != null) {
                 tfod.shutdown();
@@ -466,20 +471,18 @@ public class AutonomousCrater extends LinearOpMode {
         sleep(2000);
     }
     public void ParkArm(){
+        rh.extendMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rh.extendMotor.setTargetPosition(-1500);
         double offset = rh.extendMotor.getCurrentPosition();
         rh.extendMotor.setPower(.7);
-        while (opModeIsActive() && rh.extendMotor.getCurrentPosition()-offset > -900) {
+        while (opModeIsActive() && rh.extendMotor.getCurrentPosition()-offset > -1500) {
             telemetry.addData("Encoders", rh.extendMotor.getCurrentPosition()-offset);
             telemetry.update();
         }
         rh.extendMotor.setPower(0);
-        offset = rh.intakeArm.getCurrentPosition();
-        rh.intakeArm.setPower(.5);
-        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset > -80) {
-            telemetry.addData("IntakeEncoders", rh.intakeArm.getCurrentPosition()-offset);
-            telemetry.update();
-        }
-        rh.intakeArm.setPower(0);
+
+        rh.dumpMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rh.dumpMotor.setTargetPosition(1000);
         offset = rh.dumpMotor.getCurrentPosition();
         double power = .2;
         while (opModeIsActive() && rh.dumpMotor.getCurrentPosition()-offset < 1000) {
