@@ -23,7 +23,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.Came
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 import java.lang.*;
-
+@Disabled
 @Autonomous(name="AutonomousTest1", group="Linear Opmode")
 
 public class AutonomousTest1 extends LinearOpMode {

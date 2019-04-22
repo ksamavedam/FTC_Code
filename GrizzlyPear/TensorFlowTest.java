@@ -50,6 +50,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
+@Disabled
 @TeleOp(name = "Concept: TensorFlow Object Detection", group = "Concept")
 
 public class TensorFlowTest extends LinearOpMode {
@@ -138,9 +139,6 @@ public class TensorFlowTest extends LinearOpMode {
                     }
                     telemetry.update();
                 }
-            }
-            if (tfod != null) {
-                tfod.shutdown();
             }
         }
     }

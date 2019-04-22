@@ -55,8 +55,8 @@ public class RobotHardware {
             wheelRadius = 2;
             width = 11.7;
             length = 11.7;
-            encPerInchV = 31.008;
-            encPerInchH = 37.037;
+            encPerInchV = 25.5 ; // 31.008;
+            encPerInchH =  37.037*1.25;
             encPerInchR = 15.152;
             encPerInchD = 48.781;
         }

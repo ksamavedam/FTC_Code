@@ -41,10 +41,13 @@ public class AutonomousCrater extends LinearOpMode {
     public void runOpMode(){
         rh = new RobotHardware("GrizzlyPear", hardwareMap);
         mwm = new MecanumMath(rh);
+        telemetry.addData("Before IMU Init","");
+        telemetry.update();
 
         if(!rh.imu.isGyroCalibrated()){
                     this.sleep(50);
         }
+
         initVuforia();
 
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
@@ -52,7 +55,7 @@ public class AutonomousCrater extends LinearOpMode {
         } else {
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
-        
+
         resetRunMode();
 
         rh.latchMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -74,12 +77,14 @@ public class AutonomousCrater extends LinearOpMode {
 
             //Lower Robot
             //Detect Gold Mineral
+
             while (opModeIsActive() && position == 5) {
                 position = sampling(); // -1 : Left, 0: Center ; 1: Right
-                //position = 10;
+                //position = 0;
             }
-            lowerPear();
-            
+                lowerPear();
+
+            //position = 1;
             shakeyshakey();
 
             //Move to gold detection
@@ -88,48 +93,50 @@ public class AutonomousCrater extends LinearOpMode {
             //Left gold
             if (position == -1) {
                 //move towards gold
-                encoders = horizontalEncoder(15);
+                encoders = horizontalEncoder(13);
                 move(270, encoders, 1);
                 resetRunMode();
-                
+
                 encoders = verticalEncoder(16);
                 move(0, encoders, 0);
                 resetRunMode();
-                
+
                 //nudge the gold
-                encoders = horizontalEncoder(12);
+                encoders = horizontalEncoder(11);
                 move(270, encoders, 1);
                 resetRunMode();
-                
+
                 //go back
-                encoders = horizontalEncoder(8);
+                encoders = horizontalEncoder(10);
                 move(90, encoders, 1);
                 resetRunMode();
-                
+
                 //move forward
-                encoders = verticalEncoder(27);
+                encoders = verticalEncoder(26);
                 move(0, encoders, 0);
                 resetRunMode();
             }
             else if (position == 10) {
-                ParkArm();
+                encoders = horizontalEncoder(20);
+                move(270, encoders, 1);
+                resetRunMode();
                 break;
             }
             //Center gold
             else if (position == 0) {
                 // nudge the gold
-                encoders = horizontalEncoder(27);
+                encoders = horizontalEncoder(22);
                 move(270, encoders, 1);
                 resetRunMode();
 
                 // Go back
-                encoders = horizontalEncoder(8);
+                encoders = horizontalEncoder(9);
                 move(90, encoders, 1);
                 resetRunMode();
 
                 // Go towards wall  - forward
-                encoders = verticalEncoder(43);
-                move(0, encoders, 0);
+                encoders = verticalEncoder(45);
+                move(0, encoders, 1);
                 resetRunMode();
                 telemetry.addData("Status", "TURN 40");
                 telemetry.update();
@@ -140,34 +147,34 @@ public class AutonomousCrater extends LinearOpMode {
                 encoders = horizontalEncoder(15);
                 move(270, encoders, 1);
                 resetRunMode();
-                
-                encoders = verticalEncoder(16);
-                move(180, encoders, 1);
+
+                encoders = verticalEncoder(13);
+                move(180, encoders, 0);
                 resetRunMode();
-                
+
                 //nudge gold
-                encoders = horizontalEncoder(12);
+                encoders = horizontalEncoder(7);
                 move(270, encoders, 1);
                 resetRunMode();
-                
+
                 //go back
-                encoders = horizontalEncoder(8);
+                encoders = horizontalEncoder(9);
                 move(90, encoders, 1);
                 resetRunMode();
-                
+
                 //Go towards wall
-                encoders = verticalEncoder(59);
+                encoders = verticalEncoder(65);
                 move(0, encoders, 0);
                 resetRunMode();
             }
 
             // Common
-            rotate(127);
+            rotate(118);
             resetRunMode();
             telemetry.addData("Status", "Vert 16");
             telemetry.update();
 
-            encoders = verticalEncoder(30);
+            encoders = verticalEncoder(37);
             move(180, encoders, 0);
             resetRunMode();
 
@@ -183,7 +190,7 @@ public class AutonomousCrater extends LinearOpMode {
             telemetry.update();
 
             // Park
-            encoders = verticalEncoder(53);
+            encoders = verticalEncoder(58);
             move(0, encoders, 0);
             resetRunMode();
 
@@ -191,6 +198,9 @@ public class AutonomousCrater extends LinearOpMode {
 
             //Extend arm into crater
             ParkArm();
+            //Lower Landing/Latching
+			raisePear();
+
             // Show the elapsed game time
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
@@ -200,6 +210,16 @@ public class AutonomousCrater extends LinearOpMode {
     public void lowerPear(){
         rh.latchMotor.setTargetPosition(-9450);
         rh.latchMotor.setPower(-1);
+        while (opModeIsActive() && rh.latchMotor.isBusy()){
+            telemetry.addData("Encoders", rh.latchMotor.getCurrentPosition());
+            telemetry.update();
+        }
+        rh.latchMotor.setPower(0);
+    }
+
+    public void raisePear() {
+        rh.latchMotor.setTargetPosition(15);
+        rh.latchMotor.setPower(1);
         while (opModeIsActive() && rh.latchMotor.isBusy()){
             telemetry.addData("Encoders", rh.latchMotor.getCurrentPosition());
             telemetry.update();
@@ -218,19 +238,21 @@ public class AutonomousCrater extends LinearOpMode {
                 rh.motor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
     public void shakeyshakey(){
-        int encoders = verticalEncoder(.5);
+        int encoders = verticalEncoder(1);
         move(0, encoders, 0);
-        encoders = verticalEncoder(.5);
+        encoders = verticalEncoder(1);
         move(180, encoders, 0);
     }
     public int sampling(){
         int position = -1;
+        int count = 0 ;
         if (opModeIsActive()) {
             if (tfod != null) {
                 tfod.activate();
             }
 
             while (opModeIsActive()) {
+
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -273,6 +295,9 @@ public class AutonomousCrater extends LinearOpMode {
                     }
                     telemetry.update();
                 }
+
+                while(count++ > 20000)
+                    return 0; // Return center if we failed to detect
             }
             if (tfod != null) {
                 tfod.shutdown();
@@ -303,12 +328,19 @@ public class AutonomousCrater extends LinearOpMode {
         int encoders;
         double encPerInch = rh.encPerInchV;
         encoders = (int) Math.round(distance*encPerInch);
+        telemetry.addData("verticalEncoder: encPerInch:",encPerInch);
+        telemetry.addData("verticalEncoder",encoders);
+        telemetry.update();
+
         return encoders;
     }
     public int horizontalEncoder(double distance) {
         int encoders;
         double encPerInch = rh.encPerInchH;
         encoders = (int) Math.round(distance*encPerInch);
+        telemetry.addData("HzEncoder: encPerInch:",encPerInch);
+        telemetry.addData("HzEncoder",encoders);
+        telemetry.update();
         return encoders;
     }
     public int rotationEncoder(double degrees) {
@@ -328,19 +360,23 @@ public class AutonomousCrater extends LinearOpMode {
         double Power2 = 0;
         double Power3 = 0;
         double Power4 = 0;
+        double speed = 0;
         direction = Math.toRadians(direction);
+
         if (side == 0) {
-            Power1 = mwm.power1(.5 , 0, direction);
-            Power2 = mwm.power2(.5 , 0, direction);
-            Power3 = mwm.power3(.5 , 0, direction);
-            Power4 = mwm.power4(.5 , 0, direction);
+            speed = 0.7;
         }
         else if (side == 1) {
-            Power1 = mwm.power1(.4, 0, direction);
-            Power2 = mwm.power2(.4, 0, direction);
-            Power3 = mwm.power3(.4, 0, direction);
-            Power4 = mwm.power4(.4, 0, direction);
+            speed = 0.5;
         }
+        else if (side == 2)
+            speed = 0.8;
+
+        Power1 = mwm.power1(speed, 0, direction);
+        Power2 = mwm.power2(speed, 0, direction);
+        Power3 = mwm.power3(speed, 0, direction);
+        Power4 = mwm.power4(speed, 0, direction);
+
         // Send calculated power to wheels
         rh.motor1.setPower(Power1);
         rh.motor2.setPower(Power2);
@@ -371,18 +407,26 @@ public class AutonomousCrater extends LinearOpMode {
             rh.motor4.setTargetPosition(-encoders);
         }
         while (opModeIsActive() && rh.motor1.isBusy()){
- /*           telemetry.addData("power1", Power1);
+            telemetry.addData("encoders", encoders);
+            telemetry.addData("power1", Power1);
             telemetry.addData("power2", Power2);
             telemetry.addData("power3", Power3);
             telemetry.addData("power4", Power4);
             telemetry.addData("status", "moving");
             telemetry.update();
-*/
+
         }
         rh.motor1.setPower(0);
         rh.motor2.setPower(0);
         rh.motor3.setPower(0);
         rh.motor4.setPower(0);
+
+            telemetry.addData("encoders", encoders);
+            telemetry.addData("encoders1", rh.motor1.getTargetPosition());
+            telemetry.addData("encoders2", rh.motor2.getTargetPosition());
+            telemetry.addData("encoders3", rh.motor3.getTargetPosition());
+            telemetry.addData("encoders4", rh.motor4.getTargetPosition());
+            telemetry.update();
     }
     public void rotate(double degrees) {
         double Power1;
@@ -444,45 +488,30 @@ public class AutonomousCrater extends LinearOpMode {
         rh.motor2.setPower(0);
         rh.motor3.setPower(0);
         rh.motor4.setPower(0);
-/*
-        while (opModeIsActive()){
-              angleTurned = rh.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - angleAtStart;
-              telemetry.addData("power1", Power1);
-            telemetry.addData("power2", Power2);
-            telemetry.addData("power3", Power3);
-            telemetry.addData("power4", Power4);
-            telemetry.addData("angleAtStart", angleAtStart);
-            telemetry.addData("anglesFinal", degrees);
-            telemetry.addData("anglesCurrent", angleTurned);
-            telemetry.addData("status", "rotating");
-            telemetry.update();
-        }
-*/
+
     }
     public void claimDepot(){
-        telemetry.addData("status", "Depot");
-        telemetry.update();
+        //telemetry.addData("status", "Depot");
+        //telemetry.update();
         rh.depot.setPosition(0.5);
         sleep(2000);
     }
     public void ParkArm(){
+        rh.extendMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rh.extendMotor.setTargetPosition(-1500);
         double offset = rh.extendMotor.getCurrentPosition();
         rh.extendMotor.setPower(.7);
-        while (opModeIsActive() && rh.extendMotor.getCurrentPosition()-offset > -900) {
+        while (opModeIsActive() && rh.extendMotor.getCurrentPosition()-offset > -1500) {
             telemetry.addData("Encoders", rh.extendMotor.getCurrentPosition()-offset);
             telemetry.update();
         }
         rh.extendMotor.setPower(0);
-        offset = rh.intakeArm.getCurrentPosition();
-        rh.intakeArm.setPower(.5);
-        while (opModeIsActive() && rh.intakeArm.getCurrentPosition()-offset > -80) {
-            telemetry.addData("IntakeEncoders", rh.intakeArm.getCurrentPosition()-offset);
-            telemetry.update();
-        }
-        rh.intakeArm.setPower(0);
+
+        rh.dumpMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rh.dumpMotor.setTargetPosition(2000);
         offset = rh.dumpMotor.getCurrentPosition();
         double power = .2;
-        while (opModeIsActive() && rh.dumpMotor.getCurrentPosition()-offset < 1000) {
+        while (opModeIsActive() && rh.dumpMotor.getCurrentPosition()-offset < 2000) {
             rh.dumpMotor.setPower(power);
             if (Math.abs(power) < .4) {
                 power = power +.01;
